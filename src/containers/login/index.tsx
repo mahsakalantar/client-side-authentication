@@ -1,106 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { toast } from "sonner";
+import { AUTH_CONFIG } from "@/lib/constants";
+import {loginSchema} from "@/containers/login/schema";
+import {useAuth} from "@/hooks/useAuth";
 
-export default function Login() {
-    const [phone, setPhone] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function LoginPage() {
+    const { refetchUser } = useAuth()
     const router = useRouter();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+        setFocus,
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            phone: "",
+        },
+    });
 
-    const validatePhone = (value: string): boolean => {
-        const patterns = [
-            /^09\d{9}$/, // 09xxxxxxxxx
-            /^\+989\d{9}$/, // +989xxxxxxxxx
-            /^00989\d{9}$/, // 00989xxxxxxxxx
-        ];
-        return patterns.some((pattern) => pattern.test(value));
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setPhone(value);
-        if (value && !validatePhone(value)) {
-            setError("Invalid Iranian mobile number format");
-        } else {
-            setError("");
-        }
-    };
-
-    const handleLogin = async () => {
-        if (!validatePhone(phone)) {
-            setError("Invalid Iranian mobile number format");
-            return;
-        }
-
-        setLoading(true);
+    const onSubmit = async () => {
         try {
-            const response = await fetch("https://randomuser.me/api/?results=1&nat=us");
-            const data = await response.json();
-            const user = data.results[0];
-            const userData = {
-                name: `${user.name.first} ${user.name.last}`,
-                email: user.email,
-                picture: user.picture.medium,
-            };
-            localStorage.setItem("user", JSON.stringify(userData));
+            await refetchUser()
+            toast.success("Login Successful", {
+                description: "Welcome!",
+            });
             router.push("/dashboard");
         } catch (err) {
-            console.error("Error fetching user data:", err);
-            setError("Failed to login. Please try again.");
-        } finally {
-            setLoading(false);
+            toast.error("Login Failed", {
+                description: AUTH_CONFIG.ERROR_MESSAGES.LOGIN_FAILED,
+            });
+            setFocus("phone");
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-            <div className="w-full max-w-md space-y-8">
-                <div className="text-center">
-                    <h2 className="text-3xl font-bold text-gray-900">Login</h2>
-                    <p className="mt-2 text-sm text-gray-600">Enter your Iranian mobile number</p>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
-                    <div>
-                        <Label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                            Mobile Number
-                        </Label>
-                        <div className="mt-1">
-                            <Input
-                                id="phone"
-                                name="phone"
-                                type="tel"
-                                autoComplete="tel"
-                                required
-                                className={`appearance-none block w-full px-3 py-2 border ${error ? "border-red-500" : "border-gray-300"} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
-                                value={phone}
-                                onChange={handleChange}
-                                aria-invalid={error ? "true" : "false"}
-                                aria-describedby={error ? "phone-error" : undefined}
-                            />
-                            {error && (
-                                <p id="phone-error" className="mt-2 text-sm text-red-600">
-                                    {error}
-                                </p>
-                            )}
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-muted)] px-4">
+            <Card className="w-full max-w-md">
+                <CardHeader className="text-center">
+                    <CardTitle className="text-3xl font-bold text-[var(--color-foreground)]">Login</CardTitle>
+                    <CardDescription className="mt-2 text-sm text-muted-foreground">
+                        Enter your mobile number
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+                        <div>
+                            <Label
+                                htmlFor="phone"
+                                className="block text-sm font-medium text-[var(--color-foreground)]"
+                            >
+                                Mobile Number
+                            </Label>
+                            <div className="mt-1">
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    {...register("phone")}
+                                    className={errors.phone ? "border-destructive" : ""}
+                                    aria-invalid={errors.phone ? "true" : "false"}
+                                    aria-describedby={errors.phone ? "phone-error" : undefined}
+                                    placeholder="e.g., 09123456789 or +989123456789"
+                                />
+                                {errors.phone && (
+                                    <p id="phone-error" className="mt-2 text-sm text-destructive">
+                                        {errors.phone.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                    <div>
                         <Button
-                            type="button"
-                            onClick={handleLogin}
-                            disabled={!!error || !phone || loading}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full"
+                            variant="default"
                         >
-                            {loading ? "Logging in..." : "Login"}
+                            {isSubmitting ? "Loading..." : "Login"}
                         </Button>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </CardContent>
+                <CardFooter />
+            </Card>
         </div>
     );
 }
