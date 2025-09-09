@@ -3,7 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import {fetchUserData, saveUserData, logout as clearUserData, type UserData, getUserFromStorage} from "@/lib/auth"
+import {fetchUserData, saveUserData, logout as clearUserData,  getUserFromStorage} from "@/lib/auth"
+import {UserData} from "@/lib/types";
 
 export function useAuth() {
     const router = useRouter()
