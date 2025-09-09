@@ -1,10 +1,5 @@
 import { AUTH_CONFIG } from "@/lib/constants"
-
-export interface UserData {
-    name: string
-    email: string
-    picture: string
-}
+import {UserData} from "@/lib/types";
 
 export const validatePhoneNumber = (phone: string): boolean => {
     return AUTH_CONFIG.PHONE_PATTERNS.some((pattern) => pattern.test(phone))
