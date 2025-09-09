@@ -38,7 +38,7 @@ export function Sidebar() {
                 </div>
 
                 <div className="mt-6">
-                    <Button onClick={logout} variant="secondary" className="w-full">
+                    <Button onClick={logout} variant="outline" className="w-full">
                         Logout
                     </Button>
                 </div>

@@ -48,9 +48,11 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--color-muted)] px-4">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-bold text-[var(--color-foreground)]">Login</CardTitle>
+                    <CardTitle className="text-3xl font-bold text-[var(--color-foreground)]">
+                        Login
+                    </CardTitle>
                     <CardDescription className="mt-2 text-sm text-muted-foreground">
                         Enter your mobile number
                     </CardDescription>
@@ -85,7 +87,7 @@ export default function LoginPage() {
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full"
+                            className="w-full transition-all duration-300 hover:scale-105 hover:shadow-md"
                             variant="default"
                         >
                             {isSubmitting ? "Loading..." : "Login"}
