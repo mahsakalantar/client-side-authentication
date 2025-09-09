@@ -6,7 +6,7 @@ A modern client-side authentication system built with Next.js, TypeScript, Tailw
 1. **Clone the Repository**:
    ```bash
    git clone <repo-url>
-   cd my-auth-app
+   cd client-side-authentication
    ```
 
 2. **Install Dependencies**:
